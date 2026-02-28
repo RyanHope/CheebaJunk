@@ -24,7 +24,15 @@ do -- config
 
       addstring = itemName or addstring
 
-      table.insert(ShaguJunk_vendor, string.lower(addstring))
+      local lowerstring = string.lower(addstring)
+      for _, v in pairs(ShaguJunk_vendor) do
+        if v == lowerstring then
+          DEFAULT_CHAT_FRAME:AddMessage("=> |cffff6633".. addstring .."|r is already in your vendor list")
+          return
+        end
+      end
+
+      table.insert(ShaguJunk_vendor, lowerstring)
       DEFAULT_CHAT_FRAME:AddMessage("=> adding |cff33ffcc".. addstring .."|r to your vendor list")
 
     -- add delete entry
@@ -38,7 +46,15 @@ do -- config
 
       addstring = itemName or addstring
 
-      table.insert(ShaguJunk_delete, string.lower(addstring))
+      local lowerstring = string.lower(addstring)
+      for _, v in pairs(ShaguJunk_delete) do
+        if v == lowerstring then
+          DEFAULT_CHAT_FRAME:AddMessage("=> |cffff6633".. addstring .."|r is already in your delete list")
+          return
+        end
+      end
+
+      table.insert(ShaguJunk_delete, lowerstring)
       DEFAULT_CHAT_FRAME:AddMessage("=> adding |cff33ffcc".. addstring .."|r to your delete list")
 
     -- remove entry
@@ -59,6 +75,27 @@ do -- config
           .. ") from your deletion list")
         table.remove(ShaguJunk_delete, delete)
       end
+    -- purge duplicates
+    elseif commandlist[1] == "purge" then
+      local function dedupe(t)
+        local seen = {}
+        local removed = 0
+        local i = 1
+        while i <= table.getn(t) do
+          if seen[t[i]] then
+            table.remove(t, i)
+            removed = removed + 1
+          else
+            seen[t[i]] = true
+            i = i + 1
+          end
+        end
+        return removed
+      end
+      local vr = dedupe(ShaguJunk_vendor)
+      local dr = dedupe(ShaguJunk_delete)
+      DEFAULT_CHAT_FRAME:AddMessage("=> Purge complete: removed |cffff6633"..vr.."|r vendor and |cffff6633"..dr.."|r delete duplicates")
+
     elseif commandlist[1] == "ls" then
       local addstring = table.concat(commandlist," ",2)
       local printID = 0
@@ -82,6 +119,7 @@ do -- config
       DEFAULT_CHAT_FRAME:AddMessage("|cffaaffdd/sjunk rm 3|cffaaaaaa - |rRemoves entry '3' of your list")
       DEFAULT_CHAT_FRAME:AddMessage("|cffaaffdd/sjunk ls|cffaaaaaa - |rDisplays your current list")
       DEFAULT_CHAT_FRAME:AddMessage("|cffaaffdd/sjunk ls <text>|cffaaaaaa - |rSearch your current list for text")
+      DEFAULT_CHAT_FRAME:AddMessage("|cffaaffdd/sjunk purge|cffaaaaaa - |rRemoves duplicate entries from both lists")
     end
   end
 end
