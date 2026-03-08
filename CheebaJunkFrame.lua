@@ -14,7 +14,9 @@ local function ScanBags()
       if rawlink then
         local _, _, itemLink = string.find(rawlink, "(item:%d+:%d+:%d+:%d+)")
         if itemLink then
-          local name, _, _, _, _, _, _, _, _, texture = GetItemInfo(itemLink)
+          local name = GetItemInfo(itemLink)
+          -- GetContainerItemInfo returns texture as its first value (works in all versions)
+          local texture = GetContainerItemInfo(bag, slot)
           if name and texture then
             CheebaJunk_textures[string.lower(name)] = texture
           end

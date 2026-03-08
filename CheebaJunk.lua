@@ -178,6 +178,9 @@ do -- autovendor
             if not this.merchant then return end
 
             if name == vendor then
+              -- cache icon before selling
+              local tex = GetContainerItemInfo(bag, slot)
+              if tex then CheebaJunk_textures[name] = tex end
               -- clear cursor and sell the item
               ClearCursor()
               UseContainerItem(bag, slot)
@@ -218,6 +221,9 @@ do -- autodelete
         if name then
           for i, vendor in pairs(CheebaJunk_delete) do
             if name == vendor then
+              -- cache icon before deleting
+              local tex = GetContainerItemInfo(bag, slot)
+              if tex then CheebaJunk_textures[name] = tex end
               -- clear cursor and delete the item
               ClearCursor()
               PickupContainerItem(bag, slot)
