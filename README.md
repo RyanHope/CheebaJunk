@@ -1,4 +1,4 @@
-# ShaguJunk
+# CheebaJunk
 
 This addon can automatically delete and vendor specified items. It comes with two lists.
 A vendor-list that automatically sells all items on it to a merchant and a delete-list that
@@ -18,17 +18,17 @@ If the `/junk` command is already occupied by another addon, the `/sjunk` comman
 **WARNING: USE AT YOUR OWN RISK**
 
 ## Installation (Vanilla, 1.12)
-1. Download **[Latest Version](https://github.com/shagu/ShaguJunk/archive/master.zip)**
+1. Download **[Latest Version](https://github.com/RyanHope/CheebaJunk/archive/master.zip)**
 2. Unpack the Zip file
-3. Rename the folder "ShaguJunk-master" to "ShaguJunk"
-4. Copy "ShaguJunk" into Wow-Directory\Interface\AddOns
+3. Rename the folder "CheebaJunk-master" to "CheebaJunk"
+4. Copy "CheebaJunk" into Wow-Directory\Interface\AddOns
 5. Restart Wow
 
 ## Installation (The Burning Crusade, 2.4.3)
-1. Download **[Latest Version](https://github.com/shagu/ShaguJunk/archive/master.zip)**
+1. Download **[Latest Version](https://github.com/RyanHope/CheebaJunk/archive/master.zip)**
 2. Unpack the Zip file
-3. Rename the folder "ShaguJunk-master" to "ShaguJunk-tbc"
-4. Copy "ShaguJunk-tbc" into Wow-Directory\Interface\AddOns
+3. Rename the folder "CheebaJunk-master" to "CheebaJunk-tbc"
+4. Copy "CheebaJunk-tbc" into Wow-Directory\Interface\AddOns
 5. Restart Wow
 
 ## Commands

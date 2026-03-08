@@ -1,0 +1,8 @@
+## Interface: 20400
+## Title: |cff33ffccCheeba|cffffffffJunk
+## Author: Cheeba
+## Notes: Automatically deletes or vendors specified items
+## Version: 1.0
+## SavedVariablesPerCharacter: CheebaJunk_vendor, CheebaJunk_delete, CheebaJunk_textures
+CheebaJunk.lua
+CheebaJunkFrame.xml
