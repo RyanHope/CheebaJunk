@@ -71,7 +71,7 @@ end
 function CheebaJunkTab_OnClick()
   currentTab = this:GetID()
   PanelTemplates_Tab_OnClick(CheebaJunkFrame)
-  CheebaJunkListScroll:SetValue(0)
+  CheebaJunkListScrollScrollBar:SetValue(0)
   CheebaJunkFrame_Update()
 end
 
