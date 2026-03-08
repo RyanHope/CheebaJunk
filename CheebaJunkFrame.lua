@@ -37,10 +37,21 @@ local function GetCurrentList()
   return currentTab == 1 and CheebaJunk_vendor or CheebaJunk_delete
 end
 
+-- Build a sorted display list: array of {name, originalIndex}
+local function BuildSortedList(list)
+  local sorted = {}
+  for i = 1, table.getn(list) do
+    table.insert(sorted, { name = list[i], idx = i })
+  end
+  table.sort(sorted, function(a, b) return a.name < b.name end)
+  return sorted
+end
+
 function CheebaJunkFrame_Update()
   ScanBags()
   local list = GetCurrentList()
-  local total = table.getn(list)
+  local sorted = BuildSortedList(list)
+  local total = table.getn(sorted)
 
   FauxScrollFrame_Update(CheebaJunkListScroll, total, ROWS, ROW_HEIGHT)
   local offset = FauxScrollFrame_GetOffset(CheebaJunkListScroll)
@@ -54,14 +65,14 @@ function CheebaJunkFrame_Update()
   for i = 1, ROWS do
     local row = getglobal("CheebaJunkRow"..i)
     if row then
-      local dataIdx = i + offset
-      if dataIdx <= total then
-        local name = list[dataIdx]
+      local displayIdx = i + offset
+      if displayIdx <= total then
+        local entry = sorted[displayIdx]
         local icon  = getglobal("CheebaJunkRow"..i.."Icon")
         local label = getglobal("CheebaJunkRow"..i.."Name")
-        if icon  then icon:SetTexture(GetItemTexture(name)) end
-        if label then label:SetText(name) end
-        row.dataIdx = dataIdx
+        if icon  then icon:SetTexture(GetItemTexture(entry.name)) end
+        if label then label:SetText(entry.name) end
+        row.dataIdx = entry.idx  -- original index for removal
         row:Show()
       else
         row:Hide()
