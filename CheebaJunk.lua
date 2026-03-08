@@ -5,6 +5,21 @@ do -- config
   CheebaJunk_delete   = CheebaJunk_delete   or {}
   CheebaJunk_textures = CheebaJunk_textures or {}
 
+  -- Find an item in bags by its item string and return its icon texture
+  local function GetTextureFromBags(itemLink)
+    for bag = 0, 4 do
+      for slot = 1, GetContainerNumSlots(bag) do
+        local rawlink = GetContainerItemLink(bag, slot)
+        if rawlink then
+          local _, _, link = string.find(rawlink, "(item:%d+:%d+:%d+:%d+)")
+          if link == itemLink then
+            return GetContainerItemInfo(bag, slot)  -- texture is first return value
+          end
+        end
+      end
+    end
+  end
+
   SLASH_CHEEBAJUNK1, SLASH_CHEEBAJUNK2, SLASH_CHEEBAJUNK3 = "/cjunk", "/junk", "/cj"
   SlashCmdList["CHEEBAJUNK"] = function(message)
     local commandlist = { }
@@ -25,17 +40,16 @@ do -- config
 
       -- support item links; also cache the icon texture
       local _, _, itemLink = string.find(addstring, "(item:%d+:%d+:%d+:%d+)")
-      local itemName, texture
+      local itemName
       if itemLink then
-        local n, _, _, _, _, _, _, _, _, t = GetItemInfo(itemLink)
-        itemName, texture = n, t
+        itemName = GetItemInfo(itemLink)
+        local tex = GetTextureFromBags(itemLink)
+        if itemName and tex then
+          CheebaJunk_textures[string.lower(itemName)] = tex
+        end
       end
 
       addstring = itemName or addstring
-      if itemName and texture then
-        CheebaJunk_textures[string.lower(itemName)] = texture
-      end
-
       local lowerstring = string.lower(addstring)
       for _, v in pairs(CheebaJunk_vendor) do
         if v == lowerstring then
@@ -54,17 +68,16 @@ do -- config
 
       -- support item links; also cache the icon texture
       local _, _, itemLink = string.find(addstring, "(item:%d+:%d+:%d+:%d+)")
-      local itemName, texture
+      local itemName
       if itemLink then
-        local n, _, _, _, _, _, _, _, _, t = GetItemInfo(itemLink)
-        itemName, texture = n, t
+        itemName = GetItemInfo(itemLink)
+        local tex = GetTextureFromBags(itemLink)
+        if itemName and tex then
+          CheebaJunk_textures[string.lower(itemName)] = tex
+        end
       end
 
       addstring = itemName or addstring
-      if itemName and texture then
-        CheebaJunk_textures[string.lower(itemName)] = texture
-      end
-
       local lowerstring = string.lower(addstring)
       for _, v in pairs(CheebaJunk_delete) do
         if v == lowerstring then
