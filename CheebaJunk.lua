@@ -216,6 +216,7 @@ do -- autodelete
 
   autodelete:RegisterEvent("ITEM_PUSH")
   autodelete:SetScript("OnEvent", function()
+    autodelete.expiry = GetTime() + 3
     autodelete:Show()
   end)
 
@@ -249,7 +250,9 @@ do -- autodelete
       end
     end
 
-    -- stop processing
-    this:Hide()
+    -- stop processing only after grace period expires
+    if GetTime() >= (this.expiry or 0) then
+      this:Hide()
+    end
   end)
 end
