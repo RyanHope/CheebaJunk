@@ -3,6 +3,7 @@ local gfind = string.gmatch or string.gfind
 do -- config
   CheebaJunk_vendor   = CheebaJunk_vendor   or {}
   CheebaJunk_delete   = CheebaJunk_delete   or {}
+  CheebaJunk_open     = CheebaJunk_open     or {}
   CheebaJunk_textures = CheebaJunk_textures or {}
 
   -- Find an item in bags by its item string and return its icon texture
@@ -89,16 +90,43 @@ do -- config
       table.insert(CheebaJunk_delete, lowerstring)
       DEFAULT_CHAT_FRAME:AddMessage("=> adding |cff33ffcc".. addstring .."|r to your delete list")
 
+    -- add open entry
+    elseif commandlist[1] == "open" then
+      local addstring = table.concat(commandlist," ",2)
+      if addstring == "" then return end
+
+      local _, _, itemLink = string.find(addstring, "(item:%d+:%d+:%d+:%d+)")
+      local itemName
+      if itemLink then
+        itemName = GetItemInfo(itemLink)
+        local tex = GetTextureFromBags(itemLink)
+        if itemName and tex then
+          CheebaJunk_textures[string.lower(itemName)] = tex
+        end
+      end
+
+      addstring = itemName or addstring
+      local lowerstring = string.lower(addstring)
+      for _, v in pairs(CheebaJunk_open) do
+        if v == lowerstring then
+          DEFAULT_CHAT_FRAME:AddMessage("=> |cffff6633".. addstring .."|r is already in your open list")
+          return
+        end
+      end
+
+      table.insert(CheebaJunk_open, lowerstring)
+      DEFAULT_CHAT_FRAME:AddMessage("=> adding |cff33ffcc".. addstring .."|r to your open list")
+
     -- remove entry
     elseif commandlist[1] == "rm" then
       local vendor = tonumber(commandlist[2])
       local delete = tonumber(commandlist[2]) - table.getn(CheebaJunk_vendor)
+      local open   = tonumber(commandlist[2]) - table.getn(CheebaJunk_vendor) - table.getn(CheebaJunk_delete)
 
       if CheebaJunk_vendor[vendor] then
         DEFAULT_CHAT_FRAME:AddMessage("=> Removing entry " .. commandlist[2]
           .. " (" .. CheebaJunk_vendor[vendor]
           .. ") from your vendor list")
-
         table.remove(CheebaJunk_vendor, vendor)
 
       elseif CheebaJunk_delete[delete] then
@@ -106,6 +134,12 @@ do -- config
           .. " (" .. CheebaJunk_delete[delete]
           .. ") from your deletion list")
         table.remove(CheebaJunk_delete, delete)
+
+      elseif CheebaJunk_open[open] then
+        DEFAULT_CHAT_FRAME:AddMessage("=> Removing entry " .. commandlist[2]
+          .. " (" .. CheebaJunk_open[open]
+          .. ") from your open list")
+        table.remove(CheebaJunk_open, open)
       end
     -- purge duplicates
     elseif commandlist[1] == "purge" then
@@ -126,7 +160,8 @@ do -- config
       end
       local vr = dedupe(CheebaJunk_vendor)
       local dr = dedupe(CheebaJunk_delete)
-      DEFAULT_CHAT_FRAME:AddMessage("=> Purge complete: removed |cffff6633"..vr.."|r vendor and |cffff6633"..dr.."|r delete duplicates")
+      local or_ = dedupe(CheebaJunk_open)
+      DEFAULT_CHAT_FRAME:AddMessage("=> Purge complete: removed |cffff6633"..vr.."|r vendor, |cffff6633"..dr.."|r delete, and |cffff6633"..or_.."|r open duplicates")
 
     elseif commandlist[1] == "ls" then
       local addstring = table.concat(commandlist," ",2)
@@ -138,10 +173,18 @@ do -- config
         end
         printID = id
       end
+      local deleteOffset = printID
       DEFAULT_CHAT_FRAME:AddMessage("|cffaa3333Delete Items:")
       for id, hl in pairs(CheebaJunk_delete) do
         if string.find(hl, addstring) then
-          DEFAULT_CHAT_FRAME:AddMessage(" |r[|cffee3333"..id+printID.."|r] "..hl)
+          DEFAULT_CHAT_FRAME:AddMessage(" |r[|cffee3333"..id+deleteOffset.."|r] "..hl)
+        end
+        printID = id + deleteOffset
+      end
+      DEFAULT_CHAT_FRAME:AddMessage("|cff33aaffOpen Items:")
+      for id, hl in pairs(CheebaJunk_open) do
+        if string.find(hl, addstring) then
+          DEFAULT_CHAT_FRAME:AddMessage(" |r[|cff33aaff"..id+printID.."|r] "..hl)
         end
       end
     else
@@ -149,6 +192,7 @@ do -- config
       DEFAULT_CHAT_FRAME:AddMessage("|cffaaffdd/cjunk|cffaaaaaa - |rOpen/close the item list UI")
       DEFAULT_CHAT_FRAME:AddMessage("|cffaaffdd/cjunk vendor Fel Iron Blood Ring|cffaaaaaa - |rAutomatically vendors Fel Iron Rings")
       DEFAULT_CHAT_FRAME:AddMessage("|cffaaffdd/cjunk delete Light Hide|cffaaaaaa - |rAutomatically deletes Light Hide")
+      DEFAULT_CHAT_FRAME:AddMessage("|cffaaffdd/cjunk open Thick-shelled Clam|cffaaaaaa - |rAutomatically opens clams/containers")
       DEFAULT_CHAT_FRAME:AddMessage("|cffaaffdd/cjunk rm 3|cffaaaaaa - |rRemoves entry '3' of your list")
       DEFAULT_CHAT_FRAME:AddMessage("|cffaaffdd/cjunk ls|cffaaaaaa - |rDisplays your current list")
       DEFAULT_CHAT_FRAME:AddMessage("|cffaaffdd/cjunk ls <text>|cffaaaaaa - |rSearch your current list for text")
@@ -182,10 +226,10 @@ do -- autovendor
       for slot = 1, GetContainerNumSlots(bag), 1 do
         local rawlink = GetContainerItemLink(bag, slot)
         local _, _, link = string.find((rawlink or ""), "(item:%d+:%d+:%d+:%d+)")
-        local name = link and GetItemInfo(link)
+        local name, _, _, _, _, itemType = link and GetItemInfo(link)
         name = name and string.lower(name)
 
-        if name then
+        if name and itemType ~= "Quest" then
           for i, vendor in pairs(CheebaJunk_vendor) do
             -- abort if the merchant window disappeared
             if not this.merchant then return end
@@ -229,10 +273,10 @@ do -- autodelete
       for slot = 1, GetContainerNumSlots(bag), 1 do
         local rawlink = GetContainerItemLink(bag, slot)
         local _, _, link = string.find((rawlink or ""), "(item:%d+:%d+:%d+:%d+)")
-        local name = link and GetItemInfo(link)
+        local name, _, _, _, _, itemType = link and GetItemInfo(link)
         name = name and string.lower(name)
 
-        if name then
+        if name and itemType ~= "Quest" then
           for i, vendor in pairs(CheebaJunk_delete) do
             if name == vendor then
               -- cache icon before deleting
@@ -251,6 +295,50 @@ do -- autodelete
     end
 
     -- stop processing only after grace period expires
+    if GetTime() >= (this.expiry or 0) then
+      this:Hide()
+    end
+  end)
+end
+
+do -- autoopen
+  local autoopen = CreateFrame("Frame")
+  autoopen:Hide()
+
+  autoopen:RegisterEvent("ITEM_PUSH")
+  autoopen:SetScript("OnEvent", function()
+    -- delay start to let the loot session finish before we scan
+    autoopen.startAt = GetTime() + 1
+    autoopen.expiry  = GetTime() + 5
+    autoopen:Show()
+  end)
+
+  autoopen:SetScript("OnUpdate", function()
+    if GetTime() < (this.startAt or 0) then return end
+    if ( this.tick or 1) > GetTime() then return else this.tick = GetTime() + .1 end
+    if LootFrame:IsVisible() then return end
+
+    for bag = 0, 4, 1 do
+      for slot = 1, GetContainerNumSlots(bag), 1 do
+        local rawlink = GetContainerItemLink(bag, slot)
+        local _, _, link = string.find((rawlink or ""), "(item:%d+:%d+:%d+:%d+)")
+        local name, _, _, _, _, itemType = link and GetItemInfo(link)
+        name = name and string.lower(name)
+
+        if name and itemType ~= "Quest" then
+          for i, openitem in pairs(CheebaJunk_open) do
+            if name == openitem then
+              local tex = GetContainerItemInfo(bag, slot)
+              if tex then CheebaJunk_textures[name] = tex end
+              ClearCursor()
+              UseContainerItem(bag, slot)
+              return
+            end
+          end
+        end
+      end
+    end
+
     if GetTime() >= (this.expiry or 0) then
       this:Hide()
     end

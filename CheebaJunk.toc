@@ -3,6 +3,6 @@
 ## Author: CheebaHawk
 ## Notes: Automatically deletes or vendors specified items
 ## Version: 1.0
-## SavedVariablesPerCharacter: CheebaJunk_vendor, CheebaJunk_delete, CheebaJunk_textures
+## SavedVariablesPerCharacter: CheebaJunk_vendor, CheebaJunk_delete, CheebaJunk_open, CheebaJunk_textures
 CheebaJunk.lua
 CheebaJunkFrame.xml

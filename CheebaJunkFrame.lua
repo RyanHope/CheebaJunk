@@ -3,7 +3,7 @@
 
 local ROWS = 14
 local ROW_HEIGHT = 20
-local currentTab = 1  -- 1=vendor, 2=delete
+local currentTab = 1  -- 1=vendor, 2=delete, 3=open
 
 -- Scan bags to build a name->texture cache
 local function ScanBags()
@@ -34,7 +34,10 @@ local function GetItemTexture(name)
 end
 
 local function GetCurrentList()
-  return currentTab == 1 and CheebaJunk_vendor or CheebaJunk_delete
+  if currentTab == 1 then return CheebaJunk_vendor
+  elseif currentTab == 2 then return CheebaJunk_delete
+  else return CheebaJunk_open
+  end
 end
 
 -- Build a sorted display list: array of {name, originalIndex}
@@ -94,7 +97,7 @@ function CheebaJunkRow_OnRemoveClick()
     local list = GetCurrentList()
     local name = list[row.dataIdx]
     if name then
-      local listName = currentTab == 1 and "vendor" or "delete"
+      local listName = currentTab == 1 and "vendor" or currentTab == 2 and "delete" or "open"
       table.remove(list, row.dataIdx)
       DEFAULT_CHAT_FRAME:AddMessage("=> Removed |cffff6633"..name.."|r from "..listName.." list")
       CheebaJunkFrame_Update()
@@ -109,7 +112,7 @@ function CheebaJunkRow_OnEnter()
     if name then
       GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
       GameTooltip:AddLine(name, 1, 1, 1)
-      local label = currentTab == 1 and "|cff33ffccAuto-vendor item|r" or "|cffff6666Auto-delete item|r"
+      local label = currentTab == 1 and "|cff33ffccAuto-vendor item|r" or currentTab == 2 and "|cffff6666Auto-delete item|r" or "|cff33aaffAuto-open item|r"
       GameTooltip:AddLine(label)
       GameTooltip:AddLine("|cffaaaaaaClick X to remove from list|r")
       GameTooltip:Show()
@@ -130,7 +133,7 @@ function CheebaJunkFrame_OnLoad()
   })
   this:SetBackdropColor(0, 0, 0, 1)
   tinsert(UISpecialFrames, "CheebaJunkFrame")
-  PanelTemplates_SetNumTabs(this, 2)
+  PanelTemplates_SetNumTabs(this, 3)
   PanelTemplates_SetTab(this, 1)
   this:RegisterEvent("VARIABLES_LOADED")
   this:RegisterEvent("BAG_UPDATE")
@@ -141,6 +144,7 @@ function CheebaJunkFrame_OnEvent()
     CheebaJunk_textures = CheebaJunk_textures or {}
     CheebaJunkFrameTab1:SetText("Vendor Items")
     CheebaJunkFrameTab2:SetText("Delete Items")
+    CheebaJunkFrameTab3:SetText("Open Items")
     PanelTemplates_SetTab(CheebaJunkFrame, 1)
   elseif event == "BAG_UPDATE" then
     if CheebaJunkFrame:IsVisible() then

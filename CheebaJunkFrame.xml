@@ -184,6 +184,15 @@
         </Anchors>
       </Button>
 
+      <!-- Tab 3: Open Items -->
+      <Button name="CheebaJunkFrameTab3" inherits="CheebaJunkTabTemplate" id="3">
+        <Anchors>
+          <Anchor point="LEFT" relativeTo="CheebaJunkFrameTab2" relativePoint="RIGHT">
+            <Offset><AbsDimension x="-18" y="0"/></Offset>
+          </Anchor>
+        </Anchors>
+      </Button>
+
       <!-- "No items" empty state label -->
       <Frame name="CheebaJunkEmptyLabelFrame">
         <Anchors>
